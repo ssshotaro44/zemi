@@ -12,18 +12,16 @@ def load_images(inputpath, imagesize, type_color):
     imglist = []
     
     exclude_prefixes = ('__', '.')
-    
     for root, dirs, files in os.walk(inputpath):
         dirs[:] = [dir for dir in dirs if not dir.startswith(exclude_prefixes)]
         files[:] = [file for file in files if not file.startswith(exclude_prefixes)]
         
         for fn in sorted(files):
-            bn, ext = os.path.splittext(fn)
+            bn, ext = os.path.splitext(fn)
             if ext not in ['.bmp', 'BMP', '.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG']:
                 continue
             
             filename = os.path.join(root, fn)
-            
             if type_color == 'Color':
                 testimage = cv2.imread(filename, cv2.IMREAD_COLOR)
                 height, width = testimage.shape[:2]
@@ -42,7 +40,7 @@ def load_images(inputpath, imagesize, type_color):
             imglist.append(testimage)
         imgsdata = np.asarray(imglist, dtype=np.float32)
 
-        return imgsdata, sorted(files)
+    return imgsdata, sorted(files)
 
 
 def generate_noise(imagelist):
@@ -64,10 +62,11 @@ def save_images(savepath, filenamelist, imagelist):
         testimage = imagelist[i]
         testimage = testimage[:, :, ::-1]  # 色チャンネルをRGBからBGRへ変換
         cv2.imwrite(filename, testimage)
+        print('save_image\n\n')
 
 
-image_train, image_train_filenames = load_images("/train/", 256, 'Gray')
-image_test, image_test_filenames = load_images("/test/", 256, 'Gray')
+image_train, image_train_filenames = load_images("./train/", 256, 'Gray')
+image_test, image_test_filenames = load_images("./test/", 256, 'Gray')
 
 image_train = generate_noise(image_train)
 image_test = generate_noise(image_test)
@@ -149,7 +148,7 @@ plot_history(training)
 
 # リスト7.10
 # networkの性能を確認するためにノイズ画像からノイズを取り除いた画像を出力
-results = model.predixt(imagenoise_test, verbose=1)
+results = model.predict(imagenoise_test, verbose=1)
 
 results *= 255.0
 save_images("./result/", imagenoise_test_filenames, results)
